@@ -355,7 +355,6 @@ if UnitClassBase( "player" ) == "HUNTER" then
     local FindUnitDebuffByID = ns.FindUnitDebuffByID
 
     spec:RegisterCombatLogEvent( function ( _, subtype, _, sourceGUID, sourceName, _, _, destGUID, destName, destFlags, _, spellID, spellName )
-
         if sourceGUID == state.GUID and spellID == 259489 and subtype == "SPELL_CAST_SUCCESS" then
             pheromoneReset = FindUnitDebuffByID( "target", 270332 ) and true or false
         end
@@ -1029,7 +1028,7 @@ if UnitClassBase( "player" ) == "HUNTER" then
             velocity = 35,
 
             usable = function () return current_wildfire_bomb == "pheromone_bomb" end,
-            start = function() end,
+            start = function () end,
             impact = function ()
                 if buff.mad_bombardier.up then
                     gainCharges( "wildfire_bomb", 1 )
@@ -1331,7 +1330,6 @@ if UnitClassBase( "player" ) == "HUNTER" then
 
             start = function ()
                 removeBuff( "flame_infusion" )
-
             end,
 
             impact = function ()

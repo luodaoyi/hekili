@@ -232,10 +232,12 @@ local HekiliSpecMixin = {
         }, {
             __index = function( t, k )
                 if t.funcs[ k ] then return t.funcs[ k ]() end
+
                 local setup = rawget( t, "onLoad" )
                 if setup then
                     t.onLoad = nil
                     setup( t )
+
                     return t[ k ]
                 end
             end
@@ -474,6 +476,7 @@ local HekiliSpecMixin = {
                 return true
             end )
         end
+
         CommitKey( potion )
     end,
 
@@ -513,6 +516,7 @@ local HekiliSpecMixin = {
                     setup( t )
                     return t[ k ]
                 end
+
                 if t.funcs[ k ] then return t.funcs[ k ]() end
                 if k == "lastCast" then return state.history.casts[ t.key ] or t.realCast end
                 if k == "lastUnit" then return state.history.units[ t.key ] or t.realUnit end
@@ -735,6 +739,7 @@ local HekiliSpecMixin = {
             -- Hekili:ContinueOnSpellLoad( a.id, function( success )
             a.onLoad = function()
                 a.name = GetSpellInfo( a.id )
+
                 if not a.name then
                     for k, v in pairs( class.abilityList ) do
                         if v == a then class.abilityList[ k ] = nil end
@@ -764,16 +769,16 @@ local HekiliSpecMixin = {
                     class.abilityByName[ a.name ] = class.abilities[ a.name ] or a
                 end
 
+                if a.rangeSpell and type( a.rangeSpell ) == "number" then
+                    Hekili:ContinueOnSpellLoad( a.rangeSpell, function( success )
+                        if success then
+                            a.rangeSpell = GetSpellInfo( a.rangeSpell )
+                        else
+                            a.rangeSpell = nil
+                        end
+                    end )
+                end
 
-        if a.rangeSpell and type( a.rangeSpell ) == "number" then
-            Hekili:ContinueOnSpellLoad( a.rangeSpell, function( success )
-                if success then
-                    a.rangeSpell = GetSpellInfo( a.rangeSpell )
-                else
-                    a.rangeSpell = nil
-                end
-            end )
-                end
                 Hekili.OptionsReady = false
             end
         end
@@ -841,19 +846,23 @@ local HekiliSpecMixin = {
     RegisterCombatLogEvent = function( self, func )
         self:RegisterHook( "COMBAT_LOG_EVENT_UNFILTERED", func )
     end,
+
     RegisterCycle = function( self, func )
         self.cycle = setfenv( func, state )
     end,
 
     RegisterPet = function( self, token, id, spell, duration, ... )
         CommitKey( token )
+
         self.pets[ token ] = {
             id = type( id ) == 'function' and setfenv( id, state ) or id,
             token = token,
             spell = spell,
             duration = type( duration ) == 'function' and setfenv( duration, state ) or duration
         }
+
         local n = select( "#", ... )
+
         if n and n > 0 then
             for i = 1, n do
                 local copy = select( i, ... )
@@ -865,6 +874,7 @@ local HekiliSpecMixin = {
     RegisterTotem = function( self, token, id )
         self.totems[ token ] = id
         self.totems[ id ] = token
+
         CommitKey( token )
     end,
 
@@ -882,6 +892,7 @@ local HekiliSpecMixin = {
     -- option should be an AceOption table.
     RegisterSetting = function( self, key, value, option )
         CommitKey( key )
+
         table.insert( self.settings, {
             name = key,
             default = value,
@@ -1017,6 +1028,7 @@ function Hekili:NewSpecialization( specID, isRanged )
     end
 
     local token = getSpecializationKey( id )
+
     local spec = class.specs[ id ] or {
         id = id,
         key = token,
@@ -1291,6 +1303,13 @@ all:RegisterAuras( {
         id = 10060,
         duration = 20,
         max_stack = 1
+    },
+
+    -- SL Season 3
+    decrypted_urh_cypher = {
+        id = 368239,
+        duration = 10,
+        max_stack = 1,
     },
 
     old_war = {
@@ -5758,6 +5777,7 @@ end
 local seen = {}
 
 Hekili.SpecChangeHistory = {}
+
 function Hekili:SpecializationChanged()
     local currentSpec = GetSpecialization()
     local currentID = GetSpecializationInfo( currentSpec )
@@ -5766,6 +5786,7 @@ function Hekili:SpecializationChanged()
         C_Timer.After( 0.5, function () Hekili:SpecializationChanged() end )
         return
     end
+
     insert( self.SpecChangeHistory, {
         spec = currentID,
         time = GetTime(),
@@ -5862,6 +5883,7 @@ function Hekili:SpecializationChanged()
 
     self.currentSpec = nil
     self.currentSpecOpts = nil
+
     for i, specID in ipairs( specs ) do
         local spec = class.specs[ specID ]
 
@@ -5994,8 +6016,8 @@ function Hekili:SpecializationChanged()
                 local s = rawget( Hekili.DB.profile.specs, spec.id )
 
                 if s then
-                for k, v in pairs( spec.settings ) do
-                    if s.settings[ v.name ] == nil then s.settings[ v.name ] = v.default end
+                    for k, v in pairs( spec.settings ) do
+                        if s.settings[ v.name ] == nil then s.settings[ v.name ] = v.default end
                     end
                 end
             end
@@ -6073,11 +6095,11 @@ end
 do
     RegisterEvent( "PLAYER_ENTERING_WORLD", function( event, login, reload )
         if login or reload then
-        local currentSpec = GetSpecialization()
-        local currentID = GetSpecializationInfo( currentSpec )
+            local currentSpec = GetSpecialization()
+            local currentID = GetSpecializationInfo( currentSpec )
 
-        if currentID ~= state.spec.id then
-            Hekili:SpecializationChanged()
+            if currentID ~= state.spec.id then
+                Hekili:SpecializationChanged()
             end
         end
     end )

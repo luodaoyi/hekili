@@ -356,26 +356,35 @@ if UnitClassBase( "player" ) == "HUNTER" then
         end
     end )
 
+
     do
         local initialized = false
         local setActive = false
         local wasOutdoors = false
         local focusedTrickeryCount = 0
+
         local tricksApplied = 0
         local tricksRemoved = 0
+
         local vigilApplied = 0
         local vigilRemoved = 0
+
         local doubleApplied = 0
         local doubleRemoved = 0
+
+
+
         local gearCheck = {
             PLAYER_ENTERING_WORLD = 1,
             PLAYER_EQUIPMENT_CHANGED = 1,
         }
+
         local resets = {
             PLAYER_ENTERING_WORLD = 1,
             ZONE_CHANGED_NEW_AREA = 1,
             FOG_OF_WAR_UPDATED = 1
         }
+
         local cleuEvents = {
             SPELL_AURA_APPLIED = 1,
             SPELL_AURA_APPLIED_DOSE = 1,
@@ -383,50 +392,66 @@ if UnitClassBase( "player" ) == "HUNTER" then
             SPELL_CAST_START = 1,
             SPELL_CAST_SUCCESS = 1,
         }
+
         local ft = CreateFrame( "Frame" )
+
         ft:SetScript( "OnEvent", function( self, event, ... )
             if gearCheck[ event ] then
                 if not initialized then
                     gearCheck.PLAYER_ENTERING_WORLD = nil
                     initialized = true
                 end
+
                 local hasSet = GetPlayerAuraBySpellID( 363666 ) ~= nil
+
                 if hasSet ~= setActive then
                     setActive = hasSet
                     focusedTrickeryCount = 0
                 end
+
                 return
             end
+
             if not setActive then return end
+
             if event == "UNIT_DIED" then
                 if UnitIsUnit( ..., "player" ) then
                     focusedTrickeryCount = 0
                 end
                 return
             end
+
             if resets[ event ] then
                 local isOutdoors = IsOutdoors()
+
                 if event == "FOG_OF_WAR_UPDATED" then
                     if isOutdoors ~= wasOutdoors then
                         wasOutdoors = isOutdoors
                         focusedTrickeryCount = 0
                     end
+
                     return
                 end
+
                 wasOutdoors = isOutdoors
                 focusedTrickeryCount = 0
                 return
             end
+
             if event == "COMBAT_LOG_EVENT_UNFILTERED" then
                 local _, subtype, _, _, sourceGUID, sourceName, _, _, destGUID, destName, destFlags, _, spellID, spellName, _, amount, interrupt, a, b, c, d, offhand, multistrike = CombatLogGetCurrentEventInfo()
+
                 if subtype == "UNIT_DIED" and destGUID == state.GUID then
                     focusedTrickeryCount = 0
                     return
                 end
+
                 local now = GetTime()
             end
         end )
+
     end
+
     spec:RegisterHook( "reset_precast", function ()
         if now - action.serpent_sting.lastCast < gcd.execute * 2 and target.unit == action.serpent_sting.lastUnit then
             applyDebuff( "target", "serpent_sting" )

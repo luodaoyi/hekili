@@ -121,7 +121,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
 
 
     -- PvP Talents
-    spec:RegisterPvpTalents( { 
+    spec:RegisterPvpTalents( {
         blood_moon = 5433, -- 355995
         chaotic_imprint = 809, -- 356510
         cleansed_by_flame = 805, -- 205625
@@ -354,7 +354,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
             max_stack = 1,
         },
 
-        
+
         -- PvP Talents
         chaotic_imprint_shadow = {
             id = 356656,
@@ -495,10 +495,10 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
         if this_action == "nemesis" and Hekili:GetNumTTDsWithin( target.time_to_die ) > 1 then return "cycle" end
     end )
 
-    
+
     -- Tier 28
     spec:RegisterGear( "tier28", 188898, 188896, 188894, 188893, 188892 )
-    spec:RegisterSetBonuses( "tier28_2pc", 364438, "tier28_4pc", 363736 )    
+    spec:RegisterSetBonuses( "tier28_2pc", 364438, "tier28_4pc", 363736 )
     -- 2-Set - Deadly Dance - Increases Death Sweep and Annihilation / Blade Dance and Chaos Strike damage by 20%.
     -- 4-Set - Deadly Dance - Metamorphosis duration is increased by 6 sec. Every 60 Fury you consume reduces the cooldown of Metamorphosis by 1 sec.
 
@@ -509,7 +509,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
     spec:RegisterGear( "tier21", 152121, 152123, 152119, 152118, 152120, 152122 )
         spec:RegisterAura( "havoc_t21_4pc", {
             id = 252165,
-            duration = 8 
+            duration = 8
         } )
 
     spec:RegisterGear( "class", 139715, 139716, 139717, 139718, 139719, 139720, 139721, 139722 )
@@ -573,8 +573,8 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 if buff.chaotic_blades.up then gain( 20, "fury" ) end -- legendary
             end,
         },
-        
-        
+
+
         blade_dance = {
             id = 188499,
             cast = 0,
@@ -600,7 +600,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 end
             end,
         },
-        
+
 
         blur = {
             id = 198589,
@@ -617,14 +617,14 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 applyBuff( "blur" )
             end,
         },
-        
+
 
         chaos_nova = {
             id = 179057,
             cast = 0,
             cooldown = function () return talent.unleashed_power.enabled and 40 or 60 end,
             gcd = "spell",
-            
+
             spend = function () return talent.unleashed_power.enabled and 0 or 30 end,
             spendType = "fury",
 
@@ -637,7 +637,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 applyDebuff( "target", "chaos_nova" )
             end,
         },
-        
+
 
         chaos_strike = {
             id = 162794,
@@ -671,7 +671,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 }
             }
         },
-        
+
 
         consume_magic = {
             id = 278326,
@@ -688,7 +688,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 gain( buff.solitude.up and 22 or 20, "fury" )
             end,
         },
-        
+
 
         darkness = {
             id = 196718,
@@ -706,7 +706,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 applyBuff( "darkness" )
             end,
         },
-        
+
 
         death_sweep = {
             id = 210152,
@@ -734,7 +734,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 end
             end,
         },
-        
+
 
         demons_bite = {
             id = 162243,
@@ -753,7 +753,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
             handler = function ()
             end,
         },
-        
+
 
         disrupt = {
             id = 183752,
@@ -774,17 +774,17 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 gain( buff.solitude.up and 33 or 30, "fury" )
             end,
         },
-        
+
 
         essence_break = {
             id = 258860,
             cast = 0,
             cooldown = 20,
             gcd = "spell",
-            
+
             startsCombat = true,
             texture = 136189,
-            
+
             handler = function ()
                 applyDebuff( "target", "essence_break" )
                 active_dot.essence_break = max( 1, active_enemies )
@@ -792,7 +792,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
 
             copy = "dark_slash"
         },
-        
+
 
         eye_beam = {
             id = 198013,
@@ -809,7 +809,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
 
             start = function ()
                 last_eye_beam = query_time
-                
+
                 applyBuff( "eye_beam" )
 
                 if talent.demonic.enabled then
@@ -832,12 +832,12 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                     debuff.sinful_brand.expires = debuff.sinful_brand.expires + 0.75
                 end
             end,
-            
+
             finish = function ()
                 if level > 58 then applyBuff( "furious_gaze" ) end
             end,
         },
-        
+
 
         fel_barrage = {
             id = 258925,
@@ -857,7 +857,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 applyBuff( "fel_barrage", 2 )
             end,
         },
-        
+
 
         fel_eruption = {
             id = 211881,
@@ -877,8 +877,8 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 applyDebuff( "target", "fel_eruption" )
             end,
         },
-        
-        
+
+
         fel_rush = {
             id = 195072,
             cast = 0,
@@ -919,7 +919,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 }
             }
         },
-        
+
 
         felblade = {
             id = 232893,cast = 0,
@@ -933,12 +933,12 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
             startsCombat = true,
             texture = 1344646,
 
-            -- usable = function () return target.within15 end,        
+            -- usable = function () return target.within15 end,
             handler = function ()
                 setDistance( 5 )
             end,
         },
-        
+
 
         fel_lance = {
             id = 206966,
@@ -951,21 +951,21 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
 
             startsCombat = true,
         },
-        
-        
+
+
         glaive_tempest = {
             id = 342817,
             cast = 0,
             cooldown = 20,
             hasteCD = true,
             gcd = "spell",
-            
+
             spend = 30,
             spendType = "fury",
-            
+
             startsCombat = true,
             texture = 1455916,
-            
+
             handler = function ()
             end,
         },
@@ -988,7 +988,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 if talent.unbound_chaos.enabled then applyBuff( "unbound_chaos" ) end
             end,
         },
-        
+
 
         imprison = {
             id = 217832,
@@ -1012,7 +1012,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 }
             }
         },
-        
+
 
         metamorphosis = {
             id = 191427,
@@ -1028,7 +1028,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
             handler = function ()
                 applyBuff( "metamorphosis" )
                 last_metamorphosis = query_time
-                
+
                 setDistance( 5 )
 
                 if IsSpellKnownOrOverridesKnown( 317009 ) then
@@ -1037,7 +1037,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 end
 
                 if level > 19 then stat.haste = stat.haste + 25 end
-                
+
                 if level > 53 or azerite.chaotic_transformation.enabled then
                     setCooldown( "eye_beam", 0 )
                     setCooldown( "blade_dance", 0 )
@@ -1055,7 +1055,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 end
             }
         },
-        
+
 
         nemesis = {
             id = 206491,
@@ -1074,7 +1074,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 applyDebuff( "target", "nemesis" )
             end,
         },
-        
+
 
         netherwalk = {
             id = 196555,
@@ -1110,8 +1110,8 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
             handler = function ()
                 applyBuff( "rain_from_above" )
             end,
-        },        
-        
+        },
+
 
         reverse_magic = {
             id = 205604,
@@ -1131,23 +1131,23 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 if debuff.reversible_magic.up then removeDebuff( "player", "reversible_magic" ) end
             end,
         },
-        
-        
+
+
         spectral_sight = {
             id = 188501,
             cast = 0,
             cooldown = 60,
             gcd = "spell",
-            
+
             toggle = "cooldowns",
 
             startsCombat = true,
             texture = 1247266,
-            
+
             handler = function ()
             end,
         },
-        
+
 
         throw_glaive = {
             id = 185123,
@@ -1176,7 +1176,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                 }
             }
         },
-        
+
 
         vengeful_retreat = {
             id = 198793,
@@ -1228,7 +1228,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
             }
         },
 
-        
+
         -- Demon Hunter - Necrolord - 329554 - fodder_to_the_flame  (Fodder to the Flame)
         --[[ fodder_to_the_flame = {
             id = 329554,
@@ -1266,7 +1266,7 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
                     id = 342357,
                     duration = 120,
                     max_stack = 1,
-                },                
+                },
             }
         }, ]]
 
@@ -1277,12 +1277,12 @@ if UnitClassBase( "player" ) == "DEMONHUNTER" then
             cast = 1,
             cooldown = 180,
             gcd = "spell",
-            
+
             toggle = "essences",
 
             startsCombat = true,
             texture = 3636838,
-            
+
             handler = function ()
                 applyDebuff( "target", "the_hunt" )
                 applyDebuff( "target", "the_hunt_dot" )

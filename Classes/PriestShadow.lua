@@ -162,7 +162,7 @@ if UnitClassBase( "player" ) == "PRIEST" then
 
 
     -- PvP Talents
-    spec:RegisterPvpTalents( { 
+    spec:RegisterPvpTalents( {
         driven_to_madness = 106, -- 199259
         greater_fade = 3753, -- 213602
         improved_mass_dispel = 5380, -- 341167

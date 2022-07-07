@@ -87,7 +87,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
     } )
 
     -- PvP Talents
-    spec:RegisterPvpTalents( { 
+    spec:RegisterPvpTalents( {
         bodyguard = 168, -- 213871
         demolition = 5374, -- 329033
         disarm = 24, -- 236077
@@ -275,8 +275,8 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
     spec:RegisterStateExpr( "outburst_rage", function ()
         return outburstRage
     end )
-    
-    
+
+
     local RAGE = Enum.PowerType.Rage
     local lastRage = -1
 
@@ -301,7 +301,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             lastRage = current
         end
     end )
-    
+
 
     -- model rage expenditure reducing CDs...
     spec:RegisterHook( "spend", function( amt, resource )
@@ -321,7 +321,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
                 glory_rage = glory_rage + amt
                 local reduction = floor( glory_rage / 10 ) * 0.5
                 glory_rage = glory_rage % 10
-    
+
                 buff.conquerors_banner.expires = buff.conquerors_banner.expires + reduction
             end
 
@@ -378,15 +378,15 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
         spec:RegisterAura( "fujiedas_fury", {
             id = 207776,
             duration = 10,
-            max_stack = 4 
+            max_stack = 4
         } )
     spec:RegisterGear( "mannoroths_bloodletting_manacles", 137107 )
     spec:RegisterGear( "najentuss_vertebrae", 137087 )
     spec:RegisterGear( "soul_of_the_battlelord", 151650 )
     spec:RegisterGear( "the_great_storms_eye", 151823 )
         spec:RegisterAura( "tornados_eye", {
-            id = 248142, 
-            duration = 6, 
+            id = 248142,
+            duration = 6,
             max_stack = 6
         } )
     spec:RegisterGear( "the_walls_fell", 137054 )
@@ -448,7 +448,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             id = 18499,
             cast = 0,
             cooldown = 60,
-            gcd = "spell",
+            gcd = "off",
 
             defensive = true,
 
@@ -465,19 +465,19 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             id = 1161,
             cast = 0,
             cooldown = 240,
-            gcd = "spell",
-            
+            gcd = "off",
+
             toggle = "cooldowns",
 
             startsCombat = true,
             texture = 132091,
-            
+
             handler = function ()
                 applyDebuff( "target", "challenging_shout" )
                 active_dot.challenging_shout = active_enemies
             end,
         },
-        
+
 
         charge = {
             id = 100,
@@ -487,12 +487,12 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
 
             spend = function () return -20 * ( 1 + conduit.unnerving_focus.mod * 0.01 ) end,
             spendType = "rage",
-            
+
             startsCombat = true,
             texture = 132337,
 
             usable = function () return target.minR > 7, "requires 8 yard range or more" end,
-            
+
             handler = function ()
                 applyDebuff( "target", "charge" )
                 if legendary.reprisal.enabled then
@@ -570,15 +570,15 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             cast = 0,
             cooldown = 6,
             gcd = "spell",
-            
+
             spend = 20,
             spendType = "rage",
-            
+
             startsCombat = true,
             texture = 135358,
 
             usable = function () return target.health_pct < 20, "requires target below 20% HP" end,
-            
+
             handler = function ()
                 if rage.current > 0 then
                     local amt = min( 20, rage.current )
@@ -601,7 +601,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             cooldown = function () return talent.bounding_stride.enabled and 30 or 45 end,
             charges = function () return legendary.leaper.enabled and 3 or nil end,
             recharge = function () return legendary.leaper.enabled and ( talent.bounding_stride.enabled and 30 or 45 ) or nil end,
-            gcd = "spell",
+            gcd = "off",
 
             startsCombat = true,
             texture = 236171,
@@ -645,9 +645,11 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
 
             readyTime = function ()
                 if settings.overlap_ignore_pain then return end
+
                 if buff.ignore_pain.up and buff.ignore_pain.v1 > 0.3 * stat.attack_power * 3.5 * ( 1 + stat.versatility_atk_mod / 100 ) then
                     return buff.ignore_pain.remains - gcd.max
                 end
+
                 return 0
             end,
 
@@ -683,10 +685,10 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             cast = 0,
             cooldown = 30,
             gcd = "off",
-            
+
             startsCombat = true,
             texture = 132365,
-            
+
             handler = function ()
                 if legendary.reprisal.enabled then
                     applyBuff( "shield_block", 4 )
@@ -722,7 +724,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             id = 12975,
             cast = 0,
             cooldown = function () return talent.bolster.enabled and 120 or 180 end,
-            gcd = "spell",
+            gcd = "off",
 
             toggle = "defensives",
             defensive = true,
@@ -916,7 +918,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             charges = function () if legendary.unbreakable_will.enabled then return 2 end end,
             cooldown = function () return 240 - conduit.stalwart_guardian.mod * 0.002 end,
             recharge = function () return 240 - conduit.stalwart_guardian.mod * 0.002 end,
-            gcd = "spell",
+            gcd = "off",
 
             toggle = "defensives",
             defensive = true,
@@ -991,7 +993,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             id = 355,
             cast = 0,
             cooldown = 8,
-            gcd = "spell",
+            gcd = "off",
 
             startsCombat = true,
             texture = 136080,

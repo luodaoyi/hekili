@@ -54,14 +54,18 @@ if UnitClassBase( "player" ) == "DRUID" then
 
         celestial_infusion = {
             aura = "celestial_infusion",
+
             last = function ()
                 local app = state.buff.celestial_infusion.applied
                 local t = state.query_time
+
                 return app + floor( ( t - app ) * 2 ) * 0.5
             end,
+
             interval = 0.5,
             value = 2.5
         },
+
         natures_balance = {
             talent = "natures_balance",
 
@@ -522,6 +526,7 @@ if UnitClassBase( "player" ) == "DRUID" then
             duration = 8,
             max_stack = 1
         },
+
         oath_of_the_elder_druid = {
             id = 338643,
             duration = 60,

@@ -353,7 +353,6 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
     local last_cs_target = nil
 
     spec:RegisterCombatLogEvent( function( _, subtype, _,  sourceGUID, sourceName, _, _, destGUID, destName, destFlags, _, spellID, spellName )
-
         if sourceGUID == state.GUID and subtype == "SPELL_CAST_SUCCESS" then
             if ( spellName == class.abilities.colossus_smash.name or spellName == class.abilities.warbreaker.name ) then
                 last_cs_target = destGUID
@@ -543,7 +542,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             id = 18499,
             cast = 0,
             cooldown = 60,
-            gcd = "spell",
+            gcd = "off",
 
             toggle = "cooldowns",
 
@@ -585,7 +584,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             id = 1161,
             cast = 0,
             cooldown = 240,
-            gcd = "spell",
+            gcd = "off",
 
             startsCombat = true,
             texture = 132091,
@@ -684,7 +683,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             id = 197690,
             cast = 0,
             cooldown = 6,
-            gcd = "spell",
+            gcd = "off",
 
             startsCombat = false,
             texture = 132349,
@@ -859,7 +858,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             id = 190456,
             cast = 0,
             cooldown = 12,
-            gcd = "spell",
+            gcd = "off",
 
             spend = 0,
             spendType = "rage",
@@ -1088,7 +1087,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             id = 198817,
             cast = 0,
             cooldown = 25,
-            gcd = "spell",
+            gcd = "off",
 
             startsCombat = false,
             pvptalent = "sharpen_blade",
@@ -1127,7 +1126,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             id = 2565,
             cast = 0,
             cooldown = 16,
-            gcd = "spell",
+            gcd = "off",
 
             spend = 30,
             spendType = "rage",
@@ -1252,7 +1251,7 @@ if UnitClassBase( 'player' ) == 'WARRIOR' then
             id = 355,
             cast = 0,
             cooldown = 8,
-            gcd = "spell",
+            gcd = "off",
 
             startsCombat = true,
             texture = 136080,

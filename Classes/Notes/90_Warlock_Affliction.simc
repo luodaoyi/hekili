@@ -1,5 +1,5 @@
 ## Affliction Warlock
-## March 5, 2022
+## June 17, 2022
 
 ## Changes:
 ## - Added Spell Lock.
@@ -14,6 +14,7 @@
 ## - Adjust "burn CDs before end of fight" logic to apply only to boss fights (not trash packs).
 ## - Fleshcraft/Volatile Solvent cancel_if changed to interrupt_if.
 ## - Integrate Necro MW priority list.
+## - Don't break Drain Soul with Decimating Bolt buff.
 
 actions.precombat=fel_domination,if=time>0&!pet.alive&!buff.grimoire_of_sacrifice.up
 actions.precombat+=/summon_pet
@@ -96,7 +97,7 @@ actions+=/unstable_affliction,if=active_dot.unstable_affliction=0|ticking&refres
 actions+=/siphon_life,cycle_targets=1,if=refreshable
 actions+=/corruption,cycle_targets=1,if=refreshable&active_enemies<4-(talent.sow_the_seeds|talent.siphon_life)
 actions+=/fleshcraft,if=soulbind.volatile_solvent,interrupt_if=buff.volatile_solvent.up
-actions+=/drain_soul,interrupt=1
+actions+=/drain_soul,interrupt_if=buff.decimating_bolt.down&(!talent.shadow_embrace.enabled|debuff.shadow_embrace.stack>=3&debuff.shadow_embrace.remains>3)
 actions+=/shadow_bolt
 
 actions.aoe=phantom_singularity
@@ -125,7 +126,7 @@ actions.aoe+=/siphon_life,cycle_targets=1,if=active_dot.siphon_life<=3&refreshab
 actions.aoe+=/call_action_list,name=covenant,strict=1,if=covenant.necrolord
 actions.aoe+=/drain_life,if=buff.inevitable_demise.stack>=50|boss&buff.inevitable_demise.up&fight_remains<5|buff.inevitable_demise.stack>=35&dot.soul_rot.ticking
 actions.aoe+=/fleshcraft,if=soulbind.volatile_solvent,interrupt_if=buff.volatile_solvent.up
-actions.aoe+=/drain_soul,interrupt=1
+actions.aoe+=/drain_soul,interrupt_if=buff.decimating_bolt.down&(!talent.shadow_embrace.enabled|debuff.shadow_embrace.stack>=3&debuff.shadow_embrace.remains>3)
 actions.aoe+=/shadow_bolt
 
 actions.covenant=impending_catastrophe,if=!talent.phantom_singularity&(cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer)
@@ -140,6 +141,12 @@ actions.damage_trinkets+=/use_item,name=dreadfire_vessel
 actions.damage_trinkets+=/use_item,name=glyph_of_assimilation
 actions.damage_trinkets+=/use_item,name=unchained_gladiators_shackles
 actions.damage_trinkets+=/use_item,name=ebonsoul_vice
+actions.damage_trinkets+=/use_item,name=resonant_reservoir
+actions.damage_trinkets+=/use_item,name=architects_ingenuity_core
+actions.damage_trinkets+=/use_item,name=grim_eclipse
+actions.damage_trinkets+=/use_item,name=toe_knees_promise
+actions.damage_trinkets+=/use_item,name=mrrgrias_favor
+actions.damage_trinkets+=/use_item,name=cosmic_gladiators_resonator
 
 actions.darkglare_prep=vile_taint
 actions.darkglare_prep+=/dark_soul
@@ -150,7 +157,8 @@ actions.darkglare_prep+=/berserking
 actions.darkglare_prep+=/call_action_list,name=covenant,strict=1,if=!covenant.necrolord
 actions.darkglare_prep+=/summon_darkglare
 
-actions.delayed_trinkets=use_item,name=empyreal_ordnance,if=(covenant.night_fae&cooldown.soul_rot.remains<20)|(covenant.venthyr&cooldown.impending_catastrophe.remains<20)|(covenant.necrolord|covenant.kyrian|covenant.none)
+actions.delayed_trinkets=use_item,name=grim_eclipse,if=(covenant.night_fae&cooldown.soul_rot.remains<6)|(covenant.venthyr&cooldown.impending_catastrophe.remains<6)|(covenant.necrolord|covenant.kyrian|covenant.none)
+actions.delayed_trinkets+=/use_item,name=empyreal_ordnance,if=(covenant.night_fae&cooldown.soul_rot.remains<20)|(covenant.venthyr&cooldown.impending_catastrophe.remains<20)|(covenant.necrolord|covenant.kyrian|covenant.none)
 actions.delayed_trinkets+=/use_item,name=sunblood_amethyst,if=(covenant.night_fae&cooldown.soul_rot.remains<6)|(covenant.venthyr&cooldown.impending_catastrophe.remains<6)|(covenant.necrolord|covenant.kyrian|covenant.none)
 actions.delayed_trinkets+=/use_item,name=soulletting_ruby,if=(covenant.night_fae&cooldown.soul_rot.remains<8)|(covenant.venthyr&cooldown.impending_catastrophe.remains<8)|(covenant.necrolord|covenant.kyrian|covenant.none)
 actions.delayed_trinkets+=/use_item,name=shadowed_orb_of_torment,if=(covenant.night_fae&cooldown.soul_rot.remains<4)|(covenant.venthyr&cooldown.impending_catastrophe.remains<4)|(covenant.necrolord|covenant.kyrian|covenant.none)
@@ -169,7 +177,7 @@ actions.necro_mw+=/variable,name=trinket_delay,value=cooldown.phantom_singularit
 actions.necro_mw+=/malefic_rapture,if=time_to_die<execute_time*soul_shard&dot.unstable_affliction.ticking
 # Cast haunt to refresh before falloff.
 actions.necro_mw+=/haunt,if=dot.haunt.remains<2+execute_time
-# High - priority MW refresh if spending one global would cause us to miss the opportunity to refresh MW. 
+# High - priority MW refresh if spending one global would cause us to miss the opportunity to refresh MW.
 actions.necro_mw+=/malefic_rapture,if=time>7&buff.malefic_wrath.remains<gcd.max+execute_time
 # Fire delayed trinkets in anticipation of Decimating Bolt.
 actions.necro_mw+=/use_item,name=empyreal_ordnance,if=variable.trinket_delay<20
@@ -209,15 +217,17 @@ actions.necro_mw+=/fleshcraft,if=soulbind.volatile_solvent,cancel_if=buff.volati
 actions.necro_mw+=/haunt,if=dot.haunt.remains<3
 # Uninterruptible DS channel if we have the DB buff.
 actions.necro_mw+=/drain_soul,if=buff.decimating_bolt.up
-actions.necro_mw+=/drain_soul,if=talent.shadow_embrace&debuff.shadow_embrace.remains<3|debuff.shadow_embrace.stack<3,interrupt_if=debuff.shadow_embrace.stack>=3&debuff.shadow_embrace.remains>3
-actions.necro_mw+=/drain_soul,interrupt=1
+actions.necro_mw+=/drain_soul,if=talent.shadow_embrace&debuff.shadow_embrace.remains<3|debuff.shadow_embrace.stack<3,interrupt_if=buff.decimating_bolt.down&(!talent.shadow_embrace.enabled|debuff.shadow_embrace.stack>=3&debuff.shadow_embrace.remains>3)
+actions.necro_mw+=/drain_soul,interrupt_if=buff.decimating_bolt.down&(!talent.shadow_embrace.enabled|debuff.shadow_embrace.stack>=3&debuff.shadow_embrace.remains>3)
 actions.necro_mw+=/shadow_bolt
 
 actions.se=haunt
-actions.se+=/drain_soul,interrupt_global=1,interrupt_if=debuff.shadow_embrace.stack>=3
+actions.se+=/drain_soul,interrupt_if=buff.decimating_bolt.down&(!talent.shadow_embrace.enabled|debuff.shadow_embrace.stack>=3&debuff.shadow_embrace.remains>3)
 actions.se+=/shadow_bolt
 
-actions.stat_trinkets=use_item,name=inscrutable_quantum_device
+actions.stat_trinkets=use_item,name=the_first_sigil
+actions.stat_trinkets+=/use_item,name=scars_of_fraternal_strife
+actions.stat_trinkets+=/use_item,name=inscrutable_quantum_device
 actions.stat_trinkets+=/use_item,name=instructors_divine_bell
 actions.stat_trinkets+=/use_item,name=overflowing_anima_cage
 actions.stat_trinkets+=/use_item,name=darkmoon_deck_putrescence
@@ -226,7 +236,13 @@ actions.stat_trinkets+=/use_item,name=flame_of_battle
 actions.stat_trinkets+=/use_item,name=wakeners_frond
 actions.stat_trinkets+=/use_item,name=tablet_of_despair
 actions.stat_trinkets+=/use_item,name=sinful_aspirants_badge_of_ferocity
+actions.stat_trinkets+=/use_item,name=cosmic_aspirants_badge_of_ferocity
 actions.stat_trinkets+=/use_item,name=sinful_gladiators_badge_of_ferocity
+actions.stat_trinkets+=/use_item,name=cosmic_gladiators_badge_of_ferocity
+actions.stat_trinkets+=/use_item,name=obelisk_of_the_void
+actions.stat_trinkets+=/use_item,name=horn_of_valor
+actions.stat_trinkets+=/use_item,name=moonlit_prism
+actions.stat_trinkets+=/use_item,name=figurehead_of_the_naglfar
 actions.stat_trinkets+=/blood_fury
 actions.stat_trinkets+=/fireblood
 actions.stat_trinkets+=/berserking

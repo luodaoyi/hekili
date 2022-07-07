@@ -185,18 +185,18 @@ if UnitClassBase( 'player' ) == 'WARLOCK' then
             max_stack = 1,
 
             generate = function( ah )
-                    if pvptalent.bane_of_havoc.enabled and debuff.bane_of_havoc.up and query_time - last_havoc < ah.duration then
-                        ah.count = 1
-                        ah.applied = last_havoc
-                        ah.expires = last_havoc + ah.duration
-                        ah.caster = "player"
-                        return
-                    elseif not pvptalent.bane_of_havoc.enabled and active_dot.havoc > 0 and query_time - last_havoc < ah.duration then
-                        ah.count = 1
-                        ah.applied = last_havoc
-                        ah.expires = last_havoc + ah.duration
-                        ah.caster = "player"
-                        return
+                if pvptalent.bane_of_havoc.enabled and debuff.bane_of_havoc.up and query_time - last_havoc < ah.duration then
+                    ah.count = 1
+                    ah.applied = last_havoc
+                    ah.expires = last_havoc + ah.duration
+                    ah.caster = "player"
+                    return
+                elseif not pvptalent.bane_of_havoc.enabled and active_dot.havoc > 0 and query_time - last_havoc < ah.duration then
+                    ah.count = 1
+                    ah.applied = last_havoc
+                    ah.expires = last_havoc + ah.duration
+                    ah.caster = "player"
+                    return
                 end
 
                 ah.count = 0
@@ -486,10 +486,13 @@ if UnitClassBase( 'player' ) == 'WARLOCK' then
 
 
     local SUMMON_DEMON_TEXT
+
     spec:RegisterHook( "reset_precast", function ()
         last_havoc = nil
         soul_shards.actual = nil
+
         class.abilities.summon_pet = class.abilities[ settings.default_pet ]
+
         if not SUMMON_DEMON_TEXT then
             SUMMON_DEMON_TEXT = GetSpellInfo( 180284 )
             class.abilityList.summon_pet = "|T136082:0|t |cff00ccff[" .. ( SUMMON_DEMON_TEXT or "Summon Demon" ) .. "]|r"
@@ -1424,6 +1427,8 @@ if UnitClassBase( 'player' ) == 'WARLOCK' then
             name = "|T136082:0|t |cff00ccff[Summon Demon]|r",
             bind = function () return settings.default_pet end
         },
+
+
         summon_felhunter = {
             id = 691,
             cast = function () return ( buff.fel_domination.up and 0.5 or 6 ) * haste end,
@@ -1446,6 +1451,7 @@ if UnitClassBase( 'player' ) == 'WARLOCK' then
             end,
 
             copy = 112869,
+
             bind = function ()
                 if settings.default_pet == "summon_felhunter" then return "summon_pet" end
             end,
@@ -1499,16 +1505,22 @@ if UnitClassBase( 'player' ) == 'WARLOCK' then
                 if azerite.crashing_chaos.enabled then applyBuff( "crashing_chaos", 3600, 8 ) end
             end,
         },
+
+
         summon_sayaad = {
             id = 366222,
             cast = function () return ( buff.fel_domination.up and 0.5 or 6 ) * haste end,
             cooldown = 0,
             gcd = "spell",
+
             spend = function () return buff.fel_domination.up and 0 or 1 end,
             spendType = "soul_shards",
+
             usable = function () return not pet.alive end,
             handler = function () summonPet( "sayaad" ) end,
+
             copy = { 365349, "summon_incubus", "summon_succubus" },
+
             bind = function()
                 if settings.default_pet == "summon_sayaad" then return { "summon_incubus", "summon_succubus", "summon_pet" } end
                 return { "summon_incubus", "summon_succubus" }
@@ -1537,6 +1549,7 @@ if UnitClassBase( 'player' ) == 'WARLOCK' then
                 summonPet( "voidwalker" )
                 removeBuff( "fel_domination" )
             end,
+
             bind = function ()
                 if settings.default_pet == "summon_voidwalker" then return "summon_pet" end
             end,

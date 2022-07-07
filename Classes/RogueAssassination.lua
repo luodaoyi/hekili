@@ -211,7 +211,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
     } )
 
     -- PvP Talents
-    spec:RegisterPvpTalents( { 
+    spec:RegisterPvpTalents( {
         creeping_venom = 141, -- 354895
         death_from_above = 3479, -- 269513
         dismantle = 5405, -- 207777
@@ -230,11 +230,13 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
     end )
 
     spec:RegisterStateExpr( "effective_combo_points", function ()
-        if buff.echoing_reprimand.up and combo_points.current == buff.echoing_reprimand.stack then
-            return 7
-        end
-        return combo_points.current
+        local c = combo_points.current or 0
+        if not covenant.kyrian then return c end
+        if c < 2 or c > 5 then return c end
+        if buff[ "echoing_reprimand_" .. c ].up then return 7 end
+        return c
     end )
+
 
     local stealth = {
         rogue   = { "stealth", "vanish", "shadow_dance", "subterfuge" },
@@ -254,12 +256,12 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                 return buff.stealth.up or buff.vanish.up
             elseif k == "mantle_remains" then
                 return max( buff.stealth.remains, buff.vanish.remains )
-            
+
             elseif k == "sepsis" then
                 return buff.sepsis_buff.up
             elseif k == "sepsis_remains" then
                 return buff.sepsis_buff.remains
-            
+
             elseif k == "all" then
                 return buff.stealth.up or buff.vanish.up or buff.shadow_dance.up or buff.subterfuge.up or buff.shadowmeld.up or buff.sepsis_buff.up
             elseif k == "remains" or k == "all_remains" then
@@ -317,10 +319,10 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
         sepsis = 1,
         serrated_bone_spike = 1,
     }
-    
+
     local tracked_bleeds = {}
     Hekili.TB = tracked_bleeds
-    
+
     local function NewBleed( key, spellID )
         tracked_bleeds[ key ] = {
             id = spellID,
@@ -360,6 +362,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
             bleed.rate[ target ] = bleed.rate[ target ] + 1
             bleed.vendetta[ target ] = true
         end
+
         bleed.haste[ target ] = 100 + GetHaste()
     end
 
@@ -403,7 +406,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
     local removal_events = {
         SPELL_AURA_REMOVED      = true,
         SPELL_AURA_BROKEN       = true,
-        SPELL_AURA_BROKEN_SPELL = true,        
+        SPELL_AURA_BROKEN_SPELL = true,
     }
 
     local stealth_spells = {
@@ -428,7 +431,6 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
 
 
     spec:RegisterCombatLogEvent( function( _, subtype, _,  sourceGUID, sourceName, _, _, destGUID, destName, destFlags, _, spellID, spellName )
-
         if sourceGUID == state.GUID then
             if removal_events[ subtype ] then
                 if stealth_spells[ spellID ] then
@@ -471,8 +473,8 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
 
             if tracked_bleeds[ spellID ] then
                 if tick_events[ subtype ] then
-                UpdateBleedTick( spellID, destGUID, GetTime() )
-                return
+                    UpdateBleedTick( spellID, destGUID, GetTime() )
+                    return
                 elseif removal_events[ subtype ] then
                     RemoveBleed( spellID, destGUID )
                     return
@@ -551,11 +553,12 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                 reduceCooldown( "vendetta", reduction )
             end
         end
-        
+
         if resource == "combo_points" and buff.flagellation_buff.up then
             if legendary.obedience.enabled then
-            reduceCooldown( "flagellation", amt )
+                reduceCooldown( "flagellation", amt )
             end
+
             if debuff.flagellation.up then
                 stat.mod_haste_pct = stat.mod_haste_pct + amt
             end
@@ -651,16 +654,16 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                 n = n + 1
             end
         end
-        
+
         return n
     end )
-    
+
     -- Count of bleeds on all poisoned (Deadly/Wound) targets.
     spec:RegisterStateExpr( "poisoned_bleeds", function ()
         return ns.conditionalDebuffCount( "deadly_poison_dot", "wound_poison_dot", "garrote", "internal_bleeding", "rupture" )
     end )
-    
-    
+
+
     spec:RegisterStateExpr( "ss_buffed", function ()
         return false
     end )
@@ -737,7 +740,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
         end
     end, state )
 
-    
+
     spec:RegisterHook( "reset_precast", function ()
         Hekili.Exsg = "Bleed Snapshots       Remains  Multip.  RateMod  Exsang.  Tier-28\n"
         for _, aura in orderedPairs( exsanguinated_spells ) do
@@ -837,7 +840,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
         },
         crimson_tempest = {
             id = 121411,
-            duration = function () return ( set_bonus.tier28_4pc > 0 and debuff.vendetta.up and 0.5 or 1 ) * ( talent.deeper_stratagem.enabled and 14 or 12 ) end,
+            duration = function () return ( set_bonus.tier28_4pc > 0 and debuff.vendetta.up and 0.5 or 1 ) * ( 2 * ( 1 + effective_combo_points ) ) end,
             max_stack = 1,
             meta = {
                 exsanguinated = function( t ) return t.up and tracked_bleeds.crimson_tempest.exsanguinate[ target.unit ] or false end,
@@ -852,7 +855,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                 end,
                 haste_pct = function( t ) return ( 100 / haste ) end,
                 haste_pct_next_tick = function( t ) return t.up and ( tracked_bleeds.crimson_tempest.haste[ target.unit ] or ( 100 / haste ) ) or 0 end,
-            },                    
+            },
         },
         crimson_vial = {
             id = 185311,
@@ -891,8 +894,8 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                 end,
                 haste_pct = function( t ) return ( 100 / haste ) end,
                 haste_pct_next_tick = function( t ) return t.up and ( tracked_bleeds.deadly_poison_dot.haste[ target.unit ] or ( 100 / haste ) ) or 0 end,
-            },                    
-        },  
+            },
+        },
         elaborate_planning = {
             id = 193641,
             duration = 4,
@@ -900,7 +903,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
         },
         envenom = {
             id = 32645,
-            duration = function () return talent.deeper_stratagem.enabled and 7 or 6 end,
+            duration = function () return ( 1 + effective_combo_points ) end,
             type = "Poison",
             max_stack = 1,
         },
@@ -974,7 +977,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
         },
         kidney_shot = {
             id = 408,
-            duration = function () return talent.deeper_stratagem.enabled and 7 or 6 end,
+            duration = function () return ( 1 + effective_combo_points ) end,
             max_stack = 1,
         },
         marked_for_death = {
@@ -994,7 +997,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
         },
         rupture = {
             id = 1943,
-            duration = function () return ( set_bonus.tier28_4pc > 0 and debuff.vendetta.up and 0.5 or 1 ) * ( talent.deeper_stratagem.enabled and 28 or 24 ) end,
+            duration = function () return ( set_bonus.tier28_4pc > 0 and debuff.vendetta.up and 0.5 or 1 ) * 4 * ( 1 + effective_combo_points ) end,
             tick_time = function () return ( set_bonus.tier28_4pc > 0 and debuff.vendetta.up and 0.5 or 1 ) * ( debuff.rupture.exsanguinated and haste or ( 2 * haste ) ) end,
             max_stack = 1,
             meta = {
@@ -1024,7 +1027,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
         },
         slice_and_dice = {
             id = 315496,
-            duration = function () return talent.deeper_stratagem.enabled and 42 or 36 end,
+            duration = function () return 6 * ( 1 + effective_combo_points ) end,
             max_stack = 1
         },
         sprint = {
@@ -1078,7 +1081,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                 vr.count = 0
                 vr.expires = 0
                 vr.applied = 0
-                vr.caster = "nobody"                
+                vr.caster = "nobody"
             end,
         },
         venomous_wounds = {
@@ -1128,7 +1131,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
 
         scent_of_blood = {
             id = 277731,
-            duration = 24,            
+            duration = 24,
         },
 
         sharpened_blades = {
@@ -1170,7 +1173,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
         }
     } )
 
-    
+
     -- Abilities
     spec:RegisterAbilities( {
         ambush = {
@@ -1178,16 +1181,16 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
             cast = 0,
             cooldown = 0,
             gcd = "spell",
-            
+
             spend = function () return buff.blindside.up and 0 or 50 end,
             spendType = "energy",
-            
+
             startsCombat = true,
             texture = 132282,
-            
+
             usable = function () return stealthed.all or buff.blindside.up or buff.sepsis_buff.up, "requires stealth or blindside or sepsis proc" end,
-            
-            handler = function ()                
+
+            handler = function ()
                 gain( 2, "combo_points" )
                 if buff.sepsis_buff.up then removeBuff( "sepsis_buff" )
                 else
@@ -1195,8 +1198,8 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                 end
             end,
         },
-        
-        
+
+
         blind = {
             id = 2094,
             cast = 0,
@@ -1277,7 +1280,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
 
             talent = "crimson_tempest",
             aura = "crimson_tempest",
-            cycle = "crimson_tempest",            
+            cycle = "crimson_tempest",
 
             usable = function () return combo_points.current > 0 end,
 
@@ -1286,13 +1289,13 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                 debuff.crimson_tempest.pmultiplier = persistent_multiplier
                 debuff.crimson_tempest.exsanguinated_rate = 1
                 debuff.crimson_tempest.exsanguinated = false
-                
+
                 if set_bonus.tier28_4pc > 0 and debuff.vendetta.up then
                     debuff.crimson_tempest.exsanguinated_rate = 2
                     debuff.crimson_tempest.vendetta_exsg = true
                 end
 
-                    removeBuff( "echoing_reprimand_" .. combo_points.current )
+                removeBuff( "echoing_reprimand_" .. combo_points.current )
                 spend( combo_points.current, "combo_points" )
 
                 if talent.elaborate_planning.enabled then applyBuff( "elaborate_planning" ) end
@@ -1349,7 +1352,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
             essential = true,
             texture = 132290,
 
-            
+
             readyTime = function () return buff.lethal_poison.remains - 120 end,
 
             handler = function ()
@@ -1406,7 +1409,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                 end
 
                 applyBuff( "envenom", 1 + effective_combo_points )
-                    removeBuff( "echoing_reprimand_" .. combo_points.current )
+                removeBuff( "echoing_reprimand_" .. combo_points.current )
                 spend( combo_points.current, "combo_points" )
 
                 if talent.elaborate_planning.enabled then applyBuff( "elaborate_planning" ) end
@@ -1523,7 +1526,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
 
             handler = function ()
                 applyDebuff( "target", "garrote" )
-                
+
                 debuff.garrote.pmultiplier = persistent_multiplier
                 debuff.garrote.exsanguinated_rate = 1
                 debuff.garrote.exsanguinated = false
@@ -1565,7 +1568,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
 
             handler = function ()
                 interrupt()
-                
+
                 if conduit.prepared_for_all.enabled and cooldown.cloak_of_shadows.remains > 0 then
                     reduceCooldown( "cloak_of_shadows", 2 * conduit.prepared_for_all.mod )
                 end
@@ -1590,12 +1593,15 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
 
             usable = function () return combo_points.current > 0 end,
             handler = function ()
+               	if talent.alacrity.enabled and combo_points.current > 4 then
+                    addStack( "alacrity", 20, 1 )
+                end
                 if talent.internal_bleeding.enabled then
                     applyDebuff( "target", "internal_bleeding" )
                     debuff.internal_bleeding.pmultiplier = persistent_multiplier
                     debuff.internal_bleeding.exsanguinated = false
                     debuff.internal_bleeding.exsanguinated_rate = 1
-                                    
+
                     if set_bonus.tier28_4pc > 0 and debuff.vendetta.up then
                         debuff.internal_bleeding.exsanguinated_rate = 2
                         debuff.internal_bleeding.vendetta_exsg = true
@@ -1761,7 +1767,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                     applyBuff( "scent_of_blood", dot.rupture.remains )
                 end
 
-                    removeBuff( "echoing_reprimand_" .. combo_points.current )
+                removeBuff( "echoing_reprimand_" .. combo_points.current )
                 spend( combo_points.current, "combo_points" )
             end,
         },
@@ -1797,7 +1803,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
             recharge = function ()
                 if pvptalent.intent_to_kill.enabled and debuff.vendetta.up then return 10 end
                 return 30 * ( 1 - conduit.quick_decisions.mod * 0.01 )
-            end,                
+            end,
             gcd = "spell",
 
             startsCombat = false,
@@ -1808,24 +1814,24 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                 setDistance( 5 )
             end,
         },
-        
+
 
         shiv = {
             id = 5938,
             cast = 0,
             cooldown = 25,
             gcd = "spell",
-            
+
             spend = function () return legendary.tiny_toxic_blade.enabled and 0 or 20 end,
             spendType = "energy",
-            
+
             startsCombat = true,
             texture = 135428,
-            
+
             handler = function ()
                 gain( 1, "combo_points" )
                 applyDebuff( "target", "crippling_poison_shiv" )
-                
+
                 if level > 57 then applyDebuff( "target", "shiv" ) end
 
                 if conduit.wellplaced_steel.enabled and debuff.envenom.up then
@@ -1837,7 +1843,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                 crippling_poison_shiv = {
                     id = 115196,
                     duration = 9,
-                    max_stack = 1,        
+                    max_stack = 1,
                 },
                 shiv = {
                     id = 319504,
@@ -1889,7 +1895,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
             startsCombat = false,
             texture = 132320,
 
-            usable = function () return time == 0 and not buff.stealth.up and not buff.vanish.up, "requires out of combat and not stealthed" end,            
+            usable = function () return time == 0 and not buff.stealth.up and not buff.vanish.up, "requires out of combat and not stealthed" end,
             handler = function ()
                 applyBuff( "stealth" )
 
@@ -2009,7 +2015,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
             texture = 134197,
 
             readyTime = function () return buff.lethal_poison.remains - 120 end,
-            
+
             handler = function ()
                 applyBuff( "wound_poison" )
             end,
@@ -2195,7 +2201,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                 if set_bonus.tier28_4pc > 0 and debuff.vendetta.up then
                     debuff.sepsis.exsanguinated_rate = 2
                     debuff.sepsis.vendetta_exsg = true
-                end                
+                end
             end,
 
             auras = {
@@ -2228,11 +2234,12 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
 
             spend = 0,
             spendType = "energy",
-            
+
             startsCombat = true,
             texture = 3565724,
 
             toggle = "essences",
+
             indicator = function ()
                 if settings.cycle and args.cycle_targets == 1 and active_enemies > 1 and target.time_to_die < longest_ttd then
                     return "cycle"
@@ -2259,7 +2266,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                             unit = "player"
                             func = FindUnitBuffByID
                         end
-                        
+
                         local name, _, count, _, duration, expires, caster = func( unit, 323654 )
 
                         if name then
@@ -2269,7 +2276,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                             t.caster = "player"
                             return
                         end
-            
+
                         t.count = 0
                         t.expires = 0
                         t.applied = 0
@@ -2287,14 +2294,14 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
             cast = 0,
             cooldown = 120,
             gcd = "off",
-            
+
             pvptalent = "shadowy_duel",
 
             startsCombat = false,
             texture = 1020341,
 
             usable = function () return target.is_player, "requires a player target" end,
-            
+
             handler = function ()
                 applyBuff( "shadowy_duel" )
             end,
@@ -2304,7 +2311,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                     id = 210558,
                     duration = 6,
                     max_stack = 1,
-                },        
+                },
             }
         },
 
@@ -2313,12 +2320,12 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
             cast = 0,
             cooldown = 180,
             gcd = "spell",
-            
+
             pvptalent = "smoke_bomb",
 
             startsCombat = false,
             texture = 458733,
-            
+
             handler = function ()
                 applyDebuff( "player", "smoke_bomb" )
                 if target.within8 then applyDebuff( "target", "smoke_bomb" ) end
@@ -2329,7 +2336,7 @@ if UnitClassBase( 'player' ) == 'ROGUE' then
                     id = 212183,
                     duration = 5,
                     max_stack = 1,
-                },        
+                },
             }
         },
     } )

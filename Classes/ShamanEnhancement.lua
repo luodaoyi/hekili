@@ -504,7 +504,6 @@ if UnitClassBase( "player" ) == "SHAMAN" then
     local vesper_last_proc = 0
 
     spec:RegisterCombatLogEvent( function( _, subtype, _,  sourceGUID, sourceName, _, _, destGUID, destName, destFlags, _, spellID, spellName )
-
         -- Deaths/despawns.
         if death_events[ subtype ] and destGUID == vesper_guid then
             vesper_guid = nil

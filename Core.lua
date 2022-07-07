@@ -674,6 +674,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
     local module = class.specs[ specID ]
 
     packName = packName or spec and spec.package
+
     if not packName then return end
 
     local pack
@@ -799,11 +800,20 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                     local known, reason = self:IsSpellKnown( action )
                     local enabled, enReason = self:IsSpellEnabled( action )
 
+                    local scriptID = packName .. ":" .. listName .. ":" .. actID
+                    state.scriptID = scriptID
+
                     if debug then
                         local d = ""
                         if entryReplaced then d = format( "\nSubstituting %s for %s action; it is otherwise not included in the priority.", action, class.abilities[ entry.action ].name ) end
 
-                        d = d .. format( "\n%-4s %s ( %s - %d )", rDepth .. ".", action, listName, actID )
+                        if action == "call_action_list" or action == "run_action_list" then
+                            d = d .. format( "\n%-4s %s ( %s - %d )", rDepth .. ".", ( action .. ":" .. ( state.args.list_name or "unknown" ) ), listName, actID )
+                        elseif action == "cancel_buff" then
+                            d = d .. format( "\n%-4s %s ( %s - %d )", rDepth .. ".", ( action .. ":" .. ( state.args.buff_name or "unknown" ) ), listName, actID )
+                        else
+                            d = d .. format( "\n%-4s %s ( %s - %d )", rDepth .. ".", action, listName, actID )
+                        end
 
                         if not known then d = d .. " - " .. ( reason or "ability unknown" )
                         elseif not enabled then d = d .. " - ability disabled ( " .. ( enReason or "unknown" ) .. " )" end
@@ -814,9 +824,6 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                     Timer:Track( "Ability Known, Enabled" )
 
                     if ability and known and enabled then
-                        local scriptID = packName .. ":" .. listName .. ":" .. actID
-                        state.scriptID = scriptID
-
                         local script = scripts:GetScript( scriptID )
 
                         wait_time = state:TimeToReady()
@@ -1474,6 +1481,10 @@ function Hekili.Update()
         return
     end
 
+    if not Hekili:IsValidSpec() then
+        return
+    end
+
     local profile = Hekili.DB.profile
 
     local specID = state.spec.id
@@ -1664,7 +1675,7 @@ function Hekili.Update()
                                 -- The ability doesn't actually do anything at any tick times, so let's use the time of the next non-channel tick event instead.
                                 for i = 1, #events do
                                     local e = events[ i ]
-        
+
                                     if e.type ~= "CHANNEL_TICK" then
                                         overrideIndex = i
                                         overrideAction = e.action
@@ -1730,7 +1741,7 @@ function Hekili.Update()
                                 end
 
                                 waitLoop = waitLoop + 1
-                                
+
                                 if waitLoop > 2 then
                                     if debug then Hekili:Debug( "BREAKING WAIT LOOP!" ) end
                                     slot.action = nil
@@ -1869,7 +1880,7 @@ function Hekili.Update()
                     if debug then scripts:ImplantDebugData( slot ) end
 
                     checkstr = checkstr and ( checkstr .. ':' .. action ) or action
-        
+
                     slot.keybind, slot.keybindFrom = Hekili:GetBindingForAction( action, display, i )
 
                     slot.resource_type = state.GetResourceType( action )
@@ -2038,6 +2049,7 @@ function Hekili.Update()
                     else
                         snaps = dispName
                     end
+
                     if Hekili.Config then LibStub( "AceConfigDialog-3.0" ):SelectGroup( "Hekili", "snapshots" ) end
                 end
             else

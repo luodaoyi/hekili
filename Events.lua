@@ -15,9 +15,8 @@ local abs = math.abs
 local lower = string.lower
 local insert, remove, sort, wipe = table.insert, table.remove, table.sort, table.wipe
 
-local GetItemInfo = ns.CachedGetItemInfo
+local CGetItemInfo = ns.CachedGetItemInfo
 local RC = LibStub( "LibRangeCheck-2.0" )
-
 
 -- Abandoning AceEvent in favor of darkend's solution from:
 -- http://andydote.co.uk/2014/11/23/good-design-in-warcraft-addons.html
@@ -220,7 +219,9 @@ end ]]
 do
     local isUnregistered = false
     local next = _G.next
+
     local requeued = {}
+
     local HandleSpellData = function( event, spellID, success )
     local callbacks = spellCallbacks[ spellID ]
 
@@ -234,6 +235,7 @@ do
             spellCallbacks[ spellID ] = nil
         end
     end
+
         if spellCallbacks == nil or next( spellCallbacks ) == nil then
             UnregisterEvent( "SPELL_DATA_LOAD_RESULT", HandleSpellData )
             -- print( "Unregistered HandleSpellData" )
@@ -255,9 +257,9 @@ function Hekili:ContinueOnSpellLoad( spellID, func )
             RegisterEvent( "SPELL_DATA_LOAD_RESULT", HandleSpellData )
             isUnregistered = false
         end
+
     C_Spell.RequestLoadSpellData( spellID )
 end
-
 
 function Hekili:RunSpellCallbacks()
     for spell, callbacks in pairs( spellCallbacks ) do
@@ -268,8 +270,8 @@ function Hekili:RunSpellCallbacks()
         if #callbacks == 0 then
             spellCallbacks[ spell ] = nil
         end
-        end
     end
+end
 end
 
 
@@ -285,14 +287,14 @@ do
 
         for key, ability in pairs( class.abilities ) do
             if ability.recheck_name then
-                local name, link = GetItemInfo( ability.item )
+                local name, link = CGetItemInfo( ability.item )
 
                 if name then
                     ability.name = name
                     ability.texture = nil
                     ability.link = link
                     ability.elem.name = name
-                    ability.elem.texture = select( 10, GetItemInfo( ability.item ) )
+                    ability.elem.texture = select( 10, CGetItemInfo( ability.item ) )
 
                     class.abilities[ name ] = ability
                     ability.recheck_name = nil
@@ -650,6 +652,7 @@ do
 
     local wasWearing = {}
     local updateIsQueued = false
+    local maxItemSlot = Enum.ItemSlotFilterTypeMeta.MaxValue
 
     function ns.updateGear()
         if not Hekili.PLAYER_ENTERING_WORLD or GetTime() - lastUpdate < 1 then
@@ -680,7 +683,7 @@ do
         for set, items in pairs( class.gear ) do
             state.set_bonus[ set ] = 0
             for item, _ in pairs( items ) do
-                if IsEquippedItem( GetItemInfo( item ) ) then
+                if item > maxItemSlot and IsEquippedItem( CGetItemInfo( item ) ) then
                     state.set_bonus[ set ] = state.set_bonus[ set ] + 1
                 end
             end
@@ -803,7 +806,7 @@ do
 
             if item then
                 state.set_bonus[ item ] = 1
-                local key, _, _, _, _, _, _, _, equipLoc = GetItemInfo( item )
+                local key, _, _, _, _, _, _, _, equipLoc = CGetItemInfo( item )
                 if key then
                     key = formatKey( key )
                     state.set_bonus[ key ] = 1
@@ -836,7 +839,7 @@ do
 
         -- Improve Pocket-Sized Computronic Device.
         if state.equipped.pocketsized_computation_device then
-            local tName = GetItemInfo( 167555 )
+            local tName = CGetItemInfo( 167555 )
             local redName, redLink = GetItemGem( tName, 1 )
 
             if redName and redLink then
@@ -1080,7 +1083,6 @@ RegisterUnitEvent( "UNIT_SPELLCAST_SUCCEEDED", "player", "target", function( eve
     if ability and state.holds[ ability.key ] then
         Hekili:RemoveHold( ability.key, true )
     end
-
 end )
 
 
@@ -1091,7 +1093,6 @@ RegisterUnitEvent( "UNIT_SPELLCAST_START", "player", "target", function( event, 
         if ability and state.holds[ ability.key ] then
             Hekili:RemoveHold( ability.key, true )
         end
-
     end
 
     Hekili:ForceUpdate( event, true )
@@ -1105,8 +1106,8 @@ RegisterUnitEvent( "UNIT_SPELLCAST_CHANNEL_START", "player", nil, function( even
         if ability and state.holds[ ability.key ] then
             Hekili:RemoveHold( ability.key, true )
         end
-
     end
+
     Hekili:ForceUpdate( event, true )
 end )
 
@@ -1118,7 +1119,6 @@ RegisterUnitEvent( "UNIT_SPELLCAST_CHANNEL_STOP", "player", "target", function( 
         if ability and state.holds[ ability.key ] then
             Hekili:RemoveHold( ability.key, true )
         end
-
     end
     Hekili:ForceUpdate( event, true )
 end )
@@ -1131,7 +1131,6 @@ RegisterUnitEvent( "UNIT_SPELLCAST_STOP", "player", "target", function( event, u
         if ability and state.holds[ ability.key ] then
             Hekili:RemoveHold( ability.key, true )
         end
-
     end
     Hekili:ForceUpdate( event, true )
 end )
@@ -1173,7 +1172,6 @@ RegisterUnitEvent( "UNIT_SPELLCAST_DELAYED", "player", nil, function( event, uni
                 state:QueueEvent( ability.impactSpell or ability.key, finish / 1000, 0.05 + travel, "PROJECTILE_IMPACT", target, true )
             end
         end
-
         Hekili:ForceUpdate( event )
     end
 end )
@@ -1260,7 +1258,6 @@ local function UNIT_POWER_FREQUENT( event, unit, power )
         end
 
     end
-
     Hekili:ForceUpdate( event, true )
 end
 Hekili:ProfileCPU( "UNIT_POWER_UPDATE", UNIT_POWER_FREQUENT )
@@ -1333,6 +1330,7 @@ do
                     state[ unit ].updated = true
                     Hekili:ForceUpdate( event, true )
                     return
+
                     --[[
                     if info.isHelpful then
                         helpful = helpful or { count = 0 }
@@ -1345,19 +1343,19 @@ do
                     end ]]
                 end
             end
-    end
+        end
+
         --[[
         if helpful then StoreMatchingAuras( unit, helpful, "HELPFUL", select( 2, UnitAuraSlots( unit, "HELPFUL" ) ) ) end
         if harmful then StoreMatchingAuras( unit, harmful, "HARMFUL", select( 2, UnitAuraSlots( unit, "HARMFUL" ) ) ) end ]]
-end )
+    end )
 
-
-RegisterEvent( "PLAYER_TARGET_CHANGED", function( event )
+    RegisterEvent( "PLAYER_TARGET_CHANGED", function( event )
         state.target.updated = true
 
-    ns.getNumberTargets( true )
-    Hekili:ForceUpdate( event, true )
-end )
+        ns.getNumberTargets( true )
+        Hekili:ForceUpdate( event, true )
+    end )
 end
 
 
@@ -1499,9 +1497,9 @@ local function CLEU_HANDLER( event, timestamp, subtype, hideCaster, sourceGUID, 
 
     local time = GetTime()
 
-    local amSource = ( sourceGUID == state.GUID )
+    local amSource  = ( sourceGUID == state.GUID )
     local petSource = ( UnitExists( "pet" ) and sourceGUID == UnitGUID( "pet" ) )
-    local amTarget = ( destGUID   == state.GUID )
+    local amTarget  = ( destGUID   == state.GUID )
 
     if subtype == 'SPELL_SUMMON' and amSource then
         -- Guardian of Azeroth check.
@@ -1560,7 +1558,6 @@ local function CLEU_HANDLER( event, timestamp, subtype, hideCaster, sourceGUID, 
             end
 
         end
-
 
         if damage and damage > 0 then
             ns.storeDamage( time, damage, bit.band( damageType, 0x1 ) == 1 )
@@ -1715,7 +1712,6 @@ local function CLEU_HANDLER( event, timestamp, subtype, hideCaster, sourceGUID, 
 
     -- Player/Minion Event
     elseif ( amSource or petSource ) or ( countPets and minion ) or ( sourceGUID == destGUID and sourceGUID == UnitGUID( 'target' ) ) then
-
         --[[ if aura_events[ subtype ] then
             if subtype == "SPELL_CAST_SUCCESS" or state.GUID == destGUID then
                 if class.abilities[ spellID ] or class.auras[ spellID ] then
@@ -1781,8 +1777,6 @@ local function CLEU_HANDLER( event, timestamp, subtype, hideCaster, sourceGUID, 
             end
         end
     end
-
-
 end
 Hekili:ProfileCPU( "CLEU_HANDLER", CLEU_HANDLER )
 RegisterEvent( "COMBAT_LOG_EVENT_UNFILTERED", function ( event ) CLEU_HANDLER( event, CombatLogGetCurrentEventInfo() ) end )
@@ -1859,7 +1853,7 @@ local function StoreKeybindInfo( page, key, aType, id, console )
         action = ability and ability.key
 
     elseif aType == "item" then
-        local item, link = GetItemInfo( id )
+        local item, link = CGetItemInfo( id )
         ability = item and ( class.abilities[ item ] or class.abilities[ link ] )
         action = ability and ability.key
 

@@ -1347,6 +1347,7 @@ if UnitClassBase( "player" ) == "PALADIN" then
                     max_stack = 1,
                 },
             },
+
             bind = { "blessing_of_spring", "blessing_of_autumn", "blessing_of_winter" }
         },
 
@@ -1399,6 +1400,7 @@ if UnitClassBase( "player" ) == "PALADIN" then
                     end,
                 }
             },
+
             bind = { "blessing_of_summer", "blessing_of_spring", "blessing_of_winter" }
         },
 
@@ -1456,6 +1458,7 @@ if UnitClassBase( "player" ) == "PALADIN" then
                     end,
                 }
             },
+
             bind = { "blessing_of_summer", "blessing_of_autumn", "blessing_of_spring" }
         },
 
@@ -1509,6 +1512,7 @@ if UnitClassBase( "player" ) == "PALADIN" then
                     end,
                 }
             },
+
             bind = { "blessing_of_summer", "blessing_of_autumn", "blessing_of_winter" }
         },
 

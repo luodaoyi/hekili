@@ -58,7 +58,7 @@ if UnitClassBase( 'player' ) == 'MAGE' then
     } )
 
     -- PvP Talents
-    spec:RegisterPvpTalents( { 
+    spec:RegisterPvpTalents( {
         burst_of_cold = 633, -- 206431
         chilled_to_the_bone = 66, -- 198126
         concentrated_coolness = 632, -- 198148
@@ -350,7 +350,7 @@ if UnitClassBase( 'player' ) == 'MAGE' then
 
         frozen = {
             duration = 1,
-    
+
             meta = {
                 spell = function( t )
                     if debuff.winters_chill.up and remaining_winters_chill > 0 then return debuff.winters_chill end
@@ -503,7 +503,7 @@ if UnitClassBase( 'player' ) == 'MAGE' then
 
             if ( spellID == 153595 or spellID == 153596 ) then
                 local t = GetTime()
-    
+
                 if subtype == "SPELL_CAST_SUCCESS" then
                     lastCometCast = t
                 elseif subtype == "SPELL_DAMAGE" and t - lastCometCast > 3 and t - lastAutoComet > 3 then
@@ -532,7 +532,7 @@ if UnitClassBase( 'player' ) == 'MAGE' then
         changed = 0,
         count = 0,
         direction = 0,
-        
+
         startCount = 0,
         startTime = 0,
         startIndex = 0,
@@ -566,7 +566,7 @@ if UnitClassBase( 'player' ) == 'MAGE' then
                             local flow = state.incanters_flow
                             local name, _, count = FindUnitBuffByID( "player", 116267, "PLAYER" )
                             local now = GetTime()
-                
+
                             if name then
                                 if count ~= flow.count then
                                     if count == 1 then flow.direction = 0
@@ -596,7 +596,7 @@ if UnitClassBase( 'player' ) == 'MAGE' then
                         incanters_flow.changed = incanters_flow.changed + 1
                     end
                 end
-    
+
                 if incanters_flow.count == 0 then
                     incanters_flow.startCount = 0
                     incanters_flow.startTime = incanters_flow.changed + floor( now - incanters_flow.changed )
@@ -605,7 +605,7 @@ if UnitClassBase( 'player' ) == 'MAGE' then
                     incanters_flow.startCount = incanters_flow.count
                     incanters_flow.startTime = incanters_flow.changed + floor( now - incanters_flow.changed )
                     incanters_flow.startIndex = 0
-                    
+
                     for i, val in ipairs( incanters_flow.values ) do
                         if val[1] == incanters_flow.count and val[2] == incanters_flow.direction then incanters_flow.startIndex = i; break end
                     end
@@ -676,7 +676,7 @@ if UnitClassBase( 'player' ) == 'MAGE' then
         end
     end )
 
-    
+
     Hekili:EmbedDisciplinaryCommand( spec )
 
 
@@ -947,17 +947,17 @@ if UnitClassBase( 'player' ) == 'MAGE' then
             cast = 0,
             cooldown = 0,
             gcd = "spell",
-            
+
             discipline = "arcane",
 
             spend = 0.02,
             spendType = "mana",
-            
+
             startsCombat = true,
             texture = 135754,
 
             talent = "focus_magic",
-            
+
             usable = function () return active_dot.focus_magic == 0 and group, "can apply one in a group" end,
             handler = function ()
                 applyBuff( "focus_magic" )
@@ -1052,7 +1052,7 @@ if UnitClassBase( 'player' ) == 'MAGE' then
             handler = function ()
                 if talent.freezing_rain.enabled then applyBuff( "freezing_rain" ) end
                 applyBuff( "frozen_orb" )
-            end,                
+            end,
 
 
             --[[ Not modeling because you can throw it off in a random direction and get no procs.  Just react.
@@ -1180,7 +1180,7 @@ if UnitClassBase( 'player' ) == 'MAGE' then
 
                 if azerite.whiteout.enabled then
                     cooldown.frozen_orb.expires = max( 0, cooldown.frozen_orb.expires - 0.5 )
-                end 
+                end
             end,
 
             impact = function ()
@@ -1281,7 +1281,7 @@ if UnitClassBase( 'player' ) == 'MAGE' then
             end,
 
             bind = "icy_veins"
-        },        
+        },
 
 
         invisibility = {
@@ -1409,7 +1409,7 @@ if UnitClassBase( 'player' ) == 'MAGE' then
 
             talent = "ring_of_frost",
 
-            handler = function ()                
+            handler = function ()
             end,
         },
 
